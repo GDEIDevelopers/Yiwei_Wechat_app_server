@@ -2,4 +2,4 @@
 
 设计图如下
 
-![设计图](https://github.com/GDEIDevelopers/Yiwei_Wechat_app/raw/main/pics/design.png)
+![设计图](https://github.com/GDEIDevelopers/Yiwei_Wechat_app_server/raw/main/pics/design.png)
