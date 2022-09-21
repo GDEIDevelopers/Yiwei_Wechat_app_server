@@ -29,7 +29,21 @@ func (w *Web) Close() {
 
 // 设置HTTP路由
 func (w *Web) setUpRouter(r *gin.Engine) {
-	r.POST("")
+	// 登录
+	r.POST("/login", w.Login)
+	// 使用默认AccessToken鉴权的API接口
+	apiGroup := r.Group("/api").Use(w.Auth)
+	// Admin模块
+	apiGroup.POST("/isAdmin", w.AdminCheck)
+	apiGroup.POST("/addAdmin", w.AdminAdd)
+	apiGroup.POST("/delAdmin", w.AdminDel)
+	apiGroup.POST("/modifyAdmin", w.AdminModify)
+
+	// 预约模块
+	apiGroup.POST("/addReserve", w.ReserveAdd)
+	apiGroup.POST("/listAllReserve", w.ReserveListAll)
+	apiGroup.POST("/listTodayReserve", w.ReserveListToday)
+	apiGroup.POST("/modifyReserve", w.ReserveModify)
 }
 
 // 运行HTTP服务器
