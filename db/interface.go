@@ -1,4 +1,4 @@
-package DB
+package db
 
 // mz_admin
 type Admin struct {
