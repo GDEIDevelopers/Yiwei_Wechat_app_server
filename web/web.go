@@ -7,13 +7,17 @@ import (
 	"time"
 
 	config "github.com/GDEIDevelopers/Yiwei_Wechat_app_server/config"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Web struct {
 	server    *http.Server
 	waitUntil chan struct{}
 	c         *config.Config
+	db        *gorm.DB
+	cache     *badger.DB
 }
 
 // 关闭HTTP服务器函数
@@ -32,18 +36,29 @@ func (w *Web) setUpRouter(r *gin.Engine) {
 	// 登录
 	r.POST("/login", w.Login)
 	// 使用默认AccessToken鉴权的API接口
-	apiGroup := r.Group("/api").Use(w.Auth)
+	adminGroup := r.Group("/admin").Use(w.AdminAuth)
 	// Admin模块
-	apiGroup.POST("/isAdmin", w.AdminCheck)
-	apiGroup.POST("/addAdmin", w.AdminAdd)
-	apiGroup.POST("/delAdmin", w.AdminDel)
-	apiGroup.POST("/modifyAdmin", w.AdminModify)
+	adminGroup.GET("/reserve/all", w.AdminAllReserve)
+	adminGroup.GET("/reserve/today", w.AdminTodayReserve)
+	adminGroup.GET("/reserve/:id/detail", w.AdminGetOneReserveDetail)
+	adminGroup.PATCH("/reserve/:id/modify", w.AdminModifyReserveDetail)
+	adminGroup.DELETE("/reserve/:id/delete", w.AdminDeleteReserve)
+	adminGroup.PUT("/reserve/create", w.AdminCreateReserve)
+
+	adminGroup.GET("/member/all/list", w.AdminListAllMember)
+	adminGroup.GET("/member/:id/list", w.AdminListOneMember)
+	adminGroup.PATCH("/member/:id/modfiy", w.AdminModifyMemebr)
+	adminGroup.DELETE("/member/:id/delete", w.AdminRemoveMember)
+	adminGroup.PUT("/member/create", w.AdminMemberCreate)
 
 	// 预约模块
-	apiGroup.POST("/addReserve", w.ReserveAdd)
-	apiGroup.POST("/listAllReserve", w.ReserveListAll)
-	apiGroup.POST("/listTodayReserve", w.ReserveListToday)
-	apiGroup.POST("/modifyReserve", w.ReserveModify)
+	userGroup := r.Group("/user").Use(w.UserAuth)
+	userGroup.GET("/reserve/all", w.UserListAllReserve)
+	userGroup.GET("/reserve/:id/detail", w.UserGetOneReserveDetail)
+	userGroup.PATCH("/reserve/:id/modify", w.UserModifyReserveDetail)
+	userGroup.DELETE("/reserve/:id/delete", w.UserDeleteReserve)
+	userGroup.PUT("/reserve/create", w.UserCreateReserve)
+
 }
 
 // 运行HTTP服务器
